@@ -2,7 +2,8 @@ import hydra
 from nuplan.planning.script.run_nuboard import main as main_nuboard
 
 if __name__ == '__main__':
-    p1 = '/mckim/MSU/course/autonomous_vehicle/nuplan-devkit_v2/tutorials/experiments/simulation_raster_experiment_long/2022.03.17.13.50.44/nuboard_1647525047.nuboard'
+
+    p1 = './experiments/simulation_raster_experiment_long/2022.03.17.13.50.44/nuboard_1647525047.nuboard'
     # Location of path with all nuBoard configs
     CONFIG_PATH = '../nuplan/planning/script/config/nuboard'
     CONFIG_NAME = 'default_nuboard'

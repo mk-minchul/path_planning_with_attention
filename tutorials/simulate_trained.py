@@ -3,7 +3,8 @@ import hydra
 from nuplan.planning.script.run_simulation import main as main_simulation
 import argparse
 import os, sys
-os.environ['NUPLAN_DATA_ROOT'] = "/data/data/autod"
+
+# os.environ['NUPLAN_DATA_ROOT'] = "/data/data/autod"
 sys.path.append(os.path.join(os.path.expanduser('~'), '.local/bin'))
 
 

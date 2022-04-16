@@ -5,8 +5,8 @@ from omegaconf import OmegaConf
 import os, sys
 import argparse
 
-os.environ['NUPLAN_DATA_ROOT'] = "/data/data/autod"
-os.environ['NUPLAN_ROOT'] = "/mckim/MSU/course/autonomous_vehicle/nuplan-devkit_v2/nuplan"
+# os.environ['NUPLAN_DATA_ROOT'] = "/data/data/autod"
+# os.environ['NUPLAN_ROOT'] = "/mckim/MSU/course/autonomous_vehicle/nuplan-devkit_v2/nuplan"
 sys.path.append(os.path.join(os.path.expanduser('~'), '.local/bin'))
 
 if __name__ == '__main__':

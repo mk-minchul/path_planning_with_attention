@@ -20,7 +20,14 @@ pip install scipy==1.8.0
 pip install pytorch-lightning==1.5.10
 
 export NUPLAN_DATA_ROOT="<YOUR_DATA_ROOT>"
+export NUPLAN_ROOT="<YOUR REPO/nuplan ROOT>"
 export PATH=$HOME/.local/bin:$PATH
+```
+
+- Example for Environment Variable for reference.
+```
+NUPLAN_ROOT=~/MSU/course/autonomous_vehicle/nuplan-devkit_v2/nuplan
+NUPLAN_DATA_ROOT=/data/data/autod
 ```
 
 # Running Experiments

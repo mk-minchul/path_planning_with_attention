@@ -4,8 +4,8 @@ import hydra
 from omegaconf import OmegaConf
 import os, sys
 
-os.environ['NUPLAN_DATA_ROOT'] = "/data/data/autod"
-os.environ['NUPLAN_ROOT'] = "/mckim/MSU/course/autonomous_vehicle/nuplan-devkit_v2/nuplan"
+# os.environ['NUPLAN_DATA_ROOT'] = "/data/data/autod"
+# os.environ['NUPLAN_ROOT'] = "/mckim/MSU/course/autonomous_vehicle/nuplan-devkit_v2/nuplan"
 
 sys.path.append(os.path.join(os.path.expanduser('~'), '.local/bin'))
 
