@@ -26,4 +26,4 @@ _ext
 .pydevproject
 *.so
 .vscode/*
-experiments/
+tutorials/experiments/
