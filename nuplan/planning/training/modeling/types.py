@@ -25,5 +25,8 @@ def move_features_type_to_device(batch: FeaturesType, device: torch.device) -> F
     """
     output = {}
     for key, value in batch.items():
-        output[key] = value.to_device(device)
+        if hasattr(value, 'to_device'):
+            output[key] = value.to_device(device)
+        else:
+            output[key] = value.to(device)
     return output

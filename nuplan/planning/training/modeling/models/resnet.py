@@ -236,6 +236,33 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
+        #auxiliary decoder layers
+        self.deconv_1 = nn.ConvTranspose2d(1024, 512, 3, padding=(1, 1))
+        self.deconv_2 = nn.ConvTranspose2d(512, 512, 3, padding=(1, 1))
+        self.upsample_1 = nn.Upsample(scale_factor=2, mode='nearest')
+        self.deconv_3 = nn.ConvTranspose2d(512, 256, 3, padding=(1, 1))
+        self.deconv_4 = nn.ConvTranspose2d(256, 256, 3, padding=(1, 1))
+        self.upsample_2 = nn.Upsample(scale_factor=2, mode='nearest')
+        self.deconv_5 = nn.ConvTranspose2d(256, 128, 3, padding=(1, 1))
+        self.deconv_6 = nn.ConvTranspose2d(128, 128, 3, padding=(1, 1))
+        self.upsample_3 = nn.Upsample(scale_factor=2, mode='nearest')
+        self.deconv_7 = nn.ConvTranspose2d(128, 64, 3, padding=(1, 1))
+        self.deconv_8 = nn.ConvTranspose2d(64, 64, 3, padding=(1, 1))
+        self.upsample_4 = nn.Upsample(scale_factor=2, mode='nearest')
+        self.deconv_9 = nn.ConvTranspose2d(64, 32, 3, padding=(1, 1))
+        self.deconv_10 = nn.ConvTranspose2d(32, 1, 3, padding=(1, 1))
+
+        #auxiliary decoder batch norm
+        self.bn_deconv1 = nn.BatchNorm2d(512)
+        self.bn_deconv2 = nn.BatchNorm2d(512)
+        self.bn_deconv3 = nn.BatchNorm2d(256)
+        self.bn_deconv4 = nn.BatchNorm2d(256)
+        self.bn_deconv5 = nn.BatchNorm2d(128)
+        self.bn_deconv6 = nn.BatchNorm2d(128)
+        self.bn_deconv7 = nn.BatchNorm2d(64)
+        self.bn_deconv8 = nn.BatchNorm2d(64)
+        self.bn_deconv9 = nn.BatchNorm2d(32)
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
@@ -296,7 +323,7 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _forward_impl(self, x: Tensor) -> Tensor:
+    def _forward_impl(self, x: Tensor) -> (Tensor, Tensor):
         # See note [TorchScript super()]
         x = self.conv1(x)
         x = self.bn1(x)
@@ -306,15 +333,33 @@ class ResNet(nn.Module):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
+
+        #auxiliary decoder
+        decoder1 = self.relu(self.bn_deconv1(self.deconv_1(x)))
+        decoder2 = self.relu(self.bn_deconv2(self.deconv_2(decoder1)))
+        decoder2_upsampled = self.upsample_1(decoder2)
+        decoder3 = self.relu(self.bn_deconv3(self.deconv_3(decoder2_upsampled)))
+        decoder4 = self.relu(self.bn_deconv4(self.deconv_4(decoder3)))
+        decoder4_upsampled = self.upsample_2(decoder4)
+        decoder5 = self.relu(self.bn_deconv5(self.deconv_5(decoder4_upsampled)))
+        decoder6 = self.relu(self.bn_deconv6(self.deconv_6(decoder5)))
+        decoder6_upsampled = self.upsample_3(decoder6)
+        decoder7 = self.relu(self.bn_deconv7(self.deconv_7(decoder6_upsampled)))
+        decoder8 = self.relu(self.bn_deconv8(self.deconv_8(decoder7)))
+        decoder8_upsampled = self.upsample_4(decoder8)
+        decoder9 = self.relu(self.bn_deconv9(self.deconv_9(decoder8_upsampled)))
+        decoder10 = self.deconv_10(decoder9)
+        #print(decoder10.size())
+
         x = self.layer4(x)
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         x = self.fc(x)
 
-        return x
+        return (x, decoder10)
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> (Tensor, Tensor):
         return self._forward_impl(x)
 
 

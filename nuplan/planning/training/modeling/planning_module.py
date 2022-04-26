@@ -7,7 +7,7 @@ from nuplan.planning.training.modeling.nn_model import NNModule
 from nuplan.planning.training.modeling.objectives.abstract_objective import aggregate_objectives
 from nuplan.planning.training.modeling.objectives.imitation_objective import AbstractObjective
 from nuplan.planning.training.modeling.types import FeaturesType, TargetsType
-
+from torch import Tensor
 
 class PlanningModule(pl.LightningModule):
     """
@@ -56,9 +56,11 @@ class PlanningModule(pl.LightningModule):
         :return: model's scalar loss
         """
         features, targets = batch
+        future_frames = features['future_agents']
+        #print("Here: "+str(future_frames.size()))
 
         predictions = self.forward(features)
-        objectives = self._compute_objectives(predictions, targets)
+        objectives = self._compute_objectives(predictions, targets, future_frames)
         metrics = self._compute_metrics(predictions, targets)
         loss = aggregate_objectives(objectives)
 
@@ -66,7 +68,7 @@ class PlanningModule(pl.LightningModule):
 
         return loss
 
-    def _compute_objectives(self, predictions: TargetsType, targets: TargetsType) -> Dict[str, torch.Tensor]:
+    def _compute_objectives(self, predictions: TargetsType, targets: TargetsType, future_frames: Tensor) -> Dict[str, torch.Tensor]:
         """
         Computes a set of learning objectives used for supervision given the model's predictions and targets.
 
@@ -74,7 +76,8 @@ class PlanningModule(pl.LightningModule):
         :param targets: supervisory signal
         :return: dictionary of objective names and values
         """
-        return {objective.name(): objective.compute(predictions, targets) for objective in self.objectives}
+
+        return {objective.name(): objective.compute(predictions, targets, future_frames) for objective in self.objectives}
 
     def _compute_metrics(self, predictions: TargetsType, targets: TargetsType) -> Dict[str, torch.Tensor]:
         """

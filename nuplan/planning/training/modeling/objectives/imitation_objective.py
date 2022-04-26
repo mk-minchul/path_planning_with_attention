@@ -4,6 +4,7 @@ import torch
 from nuplan.planning.training.modeling.objectives.abstract_objective import AbstractObjective
 from nuplan.planning.training.modeling.types import FeaturesType, TargetsType
 from nuplan.planning.training.preprocessing.features.trajectory import Trajectory
+import torch.nn as nn
 
 
 class ImitationObjective(AbstractObjective):
@@ -33,7 +34,7 @@ class ImitationObjective(AbstractObjective):
         """ Implemented. See interface. """
         return ["trajectory"]
 
-    def compute(self, predictions: FeaturesType, targets: TargetsType) -> torch.Tensor:
+    def compute(self, predictions: FeaturesType, targets: TargetsType, future_frames: torch.Tensor) -> torch.Tensor:
         """
         Computes the objective's loss given the ground truth targets and the model's predictions
         and weights it based on a fixed weight factor.
@@ -45,6 +46,9 @@ class ImitationObjective(AbstractObjective):
         predicted_trajectory = cast(Trajectory, predictions["trajectory"])
         targets_trajectory = cast(Trajectory, targets["trajectory"])
 
+        L1_loss = nn.L1Loss()
+        future_frames_loss = L1_loss(predictions["future_frames"], future_frames[:, 4, :, :])
+
         return self._weight * (
             self._fn_xy(predicted_trajectory.xy, targets_trajectory.xy) +
-            self._fn_heading(predicted_trajectory.heading, targets_trajectory.heading))
+            self._fn_heading(predicted_trajectory.heading, targets_trajectory.heading))+future_frames_loss

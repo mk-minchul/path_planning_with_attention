@@ -167,7 +167,7 @@ class RasterVisualizationCallback(pl.Callback):
         """
         with torch.no_grad():
             pl_module.eval()
-            predictions = move_features_type_to_device(pl_module(features), torch.device('cpu'))
+            predictions = move_features_type_to_device(pl_module(features["trajectory"]), torch.device('cpu'))
             pl_module.train()
 
         return predictions
@@ -190,13 +190,13 @@ class RasterVisualizationCallback(pl.Callback):
         if self.train_dataloader is None:
             self._initialize_dataloaders(trainer.datamodule)  # type: ignore
 
-        self._log_from_dataloader(
+        '''self._log_from_dataloader(
             pl_module,
             self.train_dataloader,
             trainer.logger.experiment,
             trainer.global_step,  # type: ignore
             'train',
-        )
+        )'''
 
     def on_validation_epoch_end(
             self,
@@ -216,10 +216,10 @@ class RasterVisualizationCallback(pl.Callback):
         if self.val_dataloader is None:
             self._initialize_dataloaders(trainer.datamodule)  # type: ignore
 
-        self._log_from_dataloader(
+        '''self._log_from_dataloader(
             pl_module,
             self.val_dataloader,
             trainer.logger.experiment,
             trainer.global_step,  # type: ignore
             'val',
-        )
+        )'''

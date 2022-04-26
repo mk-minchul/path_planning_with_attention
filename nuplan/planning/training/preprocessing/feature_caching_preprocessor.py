@@ -4,6 +4,8 @@ import logging
 import pathlib
 import traceback
 from typing import List, Optional, Tuple, Type, Union
+import numpy as np
+import cv2
 
 from nuplan.planning.scenario_builder.abstract_scenario import AbstractScenario
 from nuplan.planning.training.modeling.types import FeaturesType, TargetsType
@@ -89,7 +91,22 @@ class FeatureCachingPreprocessor:
             # Targets
             all_targets: TargetsType = self._compute_all_features(scenario, sample_cache_dir, self._target_builders)
 
-            return all_features, all_targets
+            from nuplan.planning.training.preprocessing.features.raster_utils import get_agents_raster
+            future_detections = scenario.get_future_detections(iteration=0, num_samples=12, time_horizon=6)
+            future_agents = []
+            for detection in future_detections:
+                agents_raster = get_agents_raster(
+                    scenario.initial_ego_state,
+                    detection,
+                    self._feature_builders[0].x_range,
+                    self._feature_builders[0].y_range,
+                    self._feature_builders[0].raster_shape,
+                )
+                future_agents.append(agents_raster)
+
+            #all_features['raster'].future_agents = np.stack(future_agents)
+            #print("Here: "+str(Tensor(future_agents).size()))
+            return all_features, all_targets, np.stack(future_agents)
         except Exception as error:
             msg = f"Failed to compute features for scenario token {scenario.token}\nError: {error}"
             logger.error(msg)

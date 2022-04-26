@@ -14,7 +14,11 @@ def _batch_abstract_features(initial_not_batched_features: FeaturesType,
     output_features = {}
     for key in initial_not_batched_features.keys():
         list_features = [feature_single[key] for feature_single in to_be_batched_features]
-        output_features[key] = initial_not_batched_features[key].collate(list_features)
+        if hasattr(initial_not_batched_features[key], 'collate'):
+            output_features[key] = initial_not_batched_features[key].collate(list_features)
+        else:
+            import torch
+            output_features[key] = torch.stack(list_features, dim=0)
 
     return output_features
 

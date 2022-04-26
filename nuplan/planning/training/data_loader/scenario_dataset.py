@@ -38,9 +38,11 @@ class ScenarioDataset(torch.utils.data.Dataset):
         """
         scenario = self._scenarios[idx]
 
-        features, targets = self._computator.compute_features(scenario)
+        features, targets, future_agents = self._computator.compute_features(scenario)
+
         features = {key: value.to_feature_tensor() for key, value in features.items()}
         targets = {key: value.to_feature_tensor() for key, value in targets.items()}
+        features['future_agents'] = torch.tensor(future_agents)
 
         return features, targets
 
