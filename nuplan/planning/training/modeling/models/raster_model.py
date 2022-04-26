@@ -10,6 +10,7 @@ from nuplan.planning.training.preprocessing.features.raster import Raster
 from nuplan.planning.training.preprocessing.features.trajectory import Trajectory
 from nuplan.planning.training.preprocessing.target_builders.abstract_target_builder import AbstractTargetBuilder
 from .resnet import resnet50
+from .vit import ViT
 
 def convert_predictions_to_trajectory(predictions: torch.Tensor) -> torch.Tensor:
     """
@@ -56,17 +57,51 @@ class RasterModel(NNModule):
             self._model = resnet50(pretrained=pretrained, att_type=attention)
             self._model.conv1 = torch.nn.Conv2d(num_input_channels, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
             self._model.num_features = 2048
+        elif model_name == 'vit':
+            print('using model VIT')
+            self._model = ViT(
+                image_size=256,
+                channels=4,
+                patch_size=32,
+                num_classes=num_output_features,
+                dim=1024,
+                depth=6,
+                heads=16,
+                mlp_dim=2048,
+                dropout=0.1,
+                emb_dropout=0.1
+            )
+        elif model_name == 'vit2':
+            print('using model VIT')
+            self._model = ViT(
+                image_size=256,
+                channels=4,
+                patch_size=16,
+                num_classes=num_output_features,
+                dim=1024,
+                depth=6,
+                heads=16,
+                mlp_dim=2048,
+                dropout=0.1,
+                emb_dropout=0.1
+            )
         else:
             raise ValueError('not implemented yet')
 
-        mlp = torch.nn.Linear(in_features=self._model.num_features, out_features=num_output_features)
 
         if hasattr(self._model, 'classifier'):
+            mlp = torch.nn.Linear(in_features=self._model.num_features, out_features=num_output_features)
             self._model.classifier = mlp
         elif hasattr(self._model, 'fc'):
+            mlp = torch.nn.Linear(in_features=self._model.num_features, out_features=num_output_features)
             self._model.fc = mlp
+        elif 'vit' in model_name:
+            pass
         else:
             raise NameError('Expected output layer named "classifier" or "fc" in model')
+
+        # img = torch.randn(1, 4, 256, 256)
+        # preds = self._model(img)
 
     def forward(self, features: FeaturesType) -> TargetsType:
         """
@@ -82,6 +117,6 @@ class RasterModel(NNModule):
         """
         raster: Raster = features["raster"]
 
-        predictions = self._model.forward(raster.data)
+        (predictions, future_frames) = self._model.forward(raster.data)
 
-        return {"trajectory": Trajectory(data=convert_predictions_to_trajectory(predictions))}
+        return {"trajectory": Trajectory(data=convert_predictions_to_trajectory(predictions)), "future_frames": future_frames}

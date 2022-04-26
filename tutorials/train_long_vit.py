@@ -42,10 +42,10 @@ if __name__ == '__main__':
         'scenario_builder.nuplan.scenario_filter.limit_scenarios_per_type=10000',  # Choose 500 scenarios to train with
         'scenario_builder.nuplan.scenario_filter.subsample_ratio=0.01',  # subsample scenarios from 20Hz to 0.2Hz
         'lightning.trainer.params.accelerator=ddp',  # ddp is not allowed in interactive environment, using ddp_spawn instead - this can bottleneck the data pipeline, it is recommended to run training outside the notebook
-        'lightning.trainer.params.max_epochs=10',
-        'lightning.optimization.optimizer.learning_rate=1e-3',
+        'lightning.trainer.params.max_epochs=50',
         'data_loader.params.batch_size=8',
         'data_loader.params.num_workers=8',
+        'lightning.optimization.optimizer.learning_rate=1e-6'
     ])
 
     # Run the training loop, optionally inspect training artifacts through tensorboard (above cell)

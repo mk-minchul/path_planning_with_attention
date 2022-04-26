@@ -18,6 +18,7 @@ nuPlan maps, required for mini and full dataset  [US, Asia] 1.21 GB(1297742811 B
 pip install -e .
 pip install scipy==1.8.0
 pip install pytorch-lightning==1.5.10
+pip install einops
 
 export NUPLAN_DATA_ROOT="<YOUR_DATA_ROOT>"
 export NUPLAN_ROOT="<YOUR REPO/nuplan ROOT>"
